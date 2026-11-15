@@ -19,33 +19,34 @@ async def main():
         epilog="""
         Для работы бота требуется файл .env
         с переменными DVMN_TOKEN, BOT_CHAT_ID и TG_TOKEN.
-        Внесите BOT_CHAT_ID в .env файл или используйте флаг --id-token
+        Внесите BOT_CHAT_ID в .env файл или используйте флаг --chat_id
         """,
         formatter_class=argparse.RawDescriptionHelpFormatter
 
     )
     parser.add_argument(
-        "--id_token",
+        "--chat_id",
         type=str,
-        default=(os.environ["BOT_CHAT_ID"]),
+        default=os.getenv("BOT_CHAT_ID"),
         help="Укажите ваш личный id чата.\n"
              "Получить его можно у @Getmyid_bot"
     )
     args = parser.parse_args()
 
     dvmn_token = os.environ["DVMN_TOKEN"]
+    tg_token = os.environ["TG_TOKEN"]
     url = "https://dvmn.org/api/long_polling/"
     headers = {"Authorization": f"Token {dvmn_token}"}
     payload = {}
+    bot = Bot(token=tg_token)
 
-    bot = Bot(token=os.environ["TG_TOKEN"])
-    if args.id_token:
-        chat_id = os.environ["BOT_CHAT_ID"]
+    if args.chat_id:
+        chat_id = args.chat_id
         chat = await bot.get_chat(chat_id)
         name = chat.first_name
     else:
-        print("Укажите ваш телеграмм чат id в аргументах")
-        return 
+        print("Укажите ваш телеграмм чат id .env файле или через флаг --chat_id")
+        return
 
     print("Бот работает!")
     while True:

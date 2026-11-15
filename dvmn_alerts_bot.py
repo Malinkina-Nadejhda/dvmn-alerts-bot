@@ -36,6 +36,11 @@ async def main():
 
     dvmn_token = os.environ["DVMN_TOKEN"]
     tg_token = os.environ["TG_TOKEN"]
+
+    if not dvmn_token or not tg_token:
+        print("Ошибка: Токены Девмана или Телеграма не найдены в .env файле.")
+        return
+
     url = "https://dvmn.org/api/long_polling/"
     headers = {"Authorization": f"Token {dvmn_token}"}
     payload = {}

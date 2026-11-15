@@ -1,5 +1,6 @@
 import  os
 import time
+import argparse
 from dotenv import load_dotenv
 import asyncio
 from telegram import Bot
@@ -8,20 +9,50 @@ import requests
 
 async def main():
     load_dotenv()
-    dvmn_token = os.getenv("DVMN_TOKEN")
+    parser = argparse.ArgumentParser(
+        description=r"""
+        Телеграм бот для отправки уведомлений с сайта https://dvmn.org/
+        о проверенных работах.
+        Пример ввода:
+        python .\dvmn_alerts_bot.py # Запуск бота.
+        """,
+        epilog="""
+        Для работы бота требуется файл .env
+        с переменными DVMN_TOKEN, BOT_CHAT_ID и TG_TOKEN.
+        Внесите BOT_CHAT_ID в .env файл или используйте флаг --id-token
+        """,
+        formatter_class=argparse.RawDescriptionHelpFormatter
+
+    )
+    parser.add_argument(
+        "--id_token",
+        type=str,
+        default=(os.environ["BOT_CHAT_ID"]),
+        help="Укажите ваш личный id чата.\n"
+             "Получить его можно у @Getmyid_bot"
+    )
+    args = parser.parse_args()
+
+    dvmn_token = os.environ["DVMN_TOKEN"]
     url = "https://dvmn.org/api/long_polling/"
     headers = {"Authorization": f"Token {dvmn_token}"}
     payload = {}
 
-    chat_id = os.getenv("BOT_CHAT_ID")
-    bot = Bot(token=os.getenv("TG_TOKEN"))
-    chat = await bot.get_chat(chat_id)
-    name = chat.first_name
+    bot = Bot(token=os.environ["TG_TOKEN"])
+    if args.id_token:
+        chat_id = os.environ["BOT_CHAT_ID"]
+        chat = await bot.get_chat(chat_id)
+        name = chat.first_name
+    else:
+        print("Укажите ваш телеграмм чат id в аргументах")
+        return 
 
     print("Бот работает!")
     while True:
         try:
-            response = requests.get(url, headers=headers, params=payload, timeout=130)
+            response = await asyncio.to_thread(
+                requests.get, url, headers=headers, params=payload, timeout=130
+            )
             lesson_data = response.json()
             
             if lesson_data["status"] == "timeout":
@@ -47,11 +78,11 @@ async def main():
                 payload["timestamp"] = lesson_data["last_attempt_timestamp"]
 
         except requests.exceptions.ReadTimeout:
-            print("Сервер не ответил, отправляем запрос заново...")
+            print("Сервер не ответил, отправляю запрос заново...")
             continue
 
         except requests.exceptions.ConnectionError:
-            print("Потеряно соединение, отправляем запрос заново...")
+            print("Потеряно соединение, отправляю запрос заново...")
             time.sleep(5)
             continue
 

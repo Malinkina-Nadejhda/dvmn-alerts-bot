@@ -14,7 +14,8 @@ async def main():
         Телеграм бот для отправки уведомлений с сайта https://dvmn.org/
         о проверенных работах.
         Пример ввода:
-        python .\dvmn_alerts_bot.py # Запуск бота.
+        python .\dvmn_alerts_bot.py # Запуск бота, если chat_id указан в .env
+        python .\dvmn_alerts_bot.py --chat_id 10856956789 # Запуск бота у указанием chat_id
         """,
         epilog="""
         Для работы бота требуется файл .env
@@ -29,7 +30,7 @@ async def main():
         type=str,
         default=os.getenv("BOT_CHAT_ID"),
         help="Укажите ваш личный id чата.\n"
-             "Получить его можно у @Getmyid_bot"
+             "Получить его можно у @userinfobot"
     )
     args = parser.parse_args()
 

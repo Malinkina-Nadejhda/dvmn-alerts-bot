@@ -23,10 +23,12 @@ def main():
                 print("Нет проверенных работ.")
             elif lesson_data["status"] == "found":
                 print("Работа вернулась с проверки!")
-                break
+                payload["timestamp"] = lesson_data["last_attempt_timestamp"]
+
         except requests.exceptions.ReadTimeout:
             print("Сервер не ответил, отправляем запрос заново...")
             continue
+
         except requests.exceptions.ConnectionError:
             print("Потеряно соединение, отправляем запрос заново...")
             time.sleep(5)

@@ -1,10 +1,11 @@
-import  os
-import time
 import argparse
-from dotenv import load_dotenv
 import asyncio
-from telegram import Bot
+import os
+import time
+
 import requests
+from dotenv import load_dotenv
+from telegram import Bot
 
 
 async def main():
@@ -60,6 +61,7 @@ async def main():
             response = await asyncio.to_thread(
                 requests.get, url, headers=headers, params=payload, timeout=130
             )
+            response.raise_for_status()
             lesson_data = response.json()
             
             if lesson_data["status"] == "timeout":

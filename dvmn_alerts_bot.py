@@ -27,8 +27,23 @@ async def main():
             if lesson_data["status"] == "timeout":
                 payload["timestamp"] = lesson_data["timestamp_to_request"]
                 print("Ожидаю работу с проверки...")
+
             elif lesson_data["status"] == "found":
-                await bot.send_message(chat_id=chat_id, text=f"{name}, Преподаватель проверил работу!!")
+                for attempt in lesson_data["new_attempts"]:
+                    lesson_title = attempt["lesson_title"]
+                    lesson_url = attempt["lesson_url"]
+                    if attempt["is_negative"]:
+                        text = (f"{name}, у вас проверили работу\n"
+                                f" '{lesson_title}'\n"
+                                f" {lesson_url}\n"
+                                f"К сожалению, в работе нашлись ошибки.")
+                    else:
+                        text = (f"{name}, у вас проверили работу\n"
+                                f" '{lesson_title}'\n"
+                                f" {lesson_url}\n"
+                                f"Преподавателю все понравилось!\n"
+                                f"Можно приступать к следующему уроку. ")
+                    await bot.send_message(chat_id=chat_id, text=text)
                 payload["timestamp"] = lesson_data["last_attempt_timestamp"]
 
         except requests.exceptions.ReadTimeout:

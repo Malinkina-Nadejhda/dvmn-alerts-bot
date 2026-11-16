@@ -36,10 +36,8 @@ async def main():
     )
     args = parser.parse_args()
 
-
     dvmn_token = os.environ["DVMN_TOKEN"]
     tg_token = os.environ["TG_TOKEN"]
-
 
     url = "https://dvmn.org/api/long_polling/"
     headers = {"Authorization": f"Token {dvmn_token}"}
@@ -73,7 +71,7 @@ async def main():
             )
             response.raise_for_status()
             lesson_data = response.json()
-            
+
             if lesson_data["status"] == "timeout":
                 payload["timestamp"] = lesson_data["timestamp_to_request"]
                 print("Ожидаю работу с проверки...")
@@ -116,4 +114,3 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         print("Остановка бота...")
-

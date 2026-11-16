@@ -9,8 +9,7 @@ from telegram import Bot
 from telegram.error import InvalidToken, TelegramError
 
 
-async def main():
-    load_dotenv()
+def parse_arguments():
     parser = argparse.ArgumentParser(
         description=r"""
         Телеграм бот для отправки уведомлений с сайта https://dvmn.org/
@@ -34,7 +33,29 @@ async def main():
         help="Укажите ваш личный id чата.\n"
              "Получить его можно у @userinfobot"
     )
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def create_message(attempt, name):
+    lesson_title = attempt["lesson_title"]
+    lesson_url = attempt["lesson_url"]
+    if attempt["is_negative"]:
+        return (f"{name}, у вас проверили работу\n"
+                f" '{lesson_title}'\n"
+                f" {lesson_url}\n"
+                f"К сожалению, в работе нашлись ошибки.")
+    else:
+        return (f"{name}, у вас проверили работу\n"
+                f" '{lesson_title}'\n"
+                f" {lesson_url}\n"
+                f"Преподавателю все понравилось!\n"
+                f"Можно приступать к следующему уроку.")
+
+
+
+async def main():
+    load_dotenv()
+    args = parse_arguments()
 
     dvmn_token = os.environ["DVMN_TOKEN"]
     tg_token = os.environ["TG_TOKEN"]
@@ -78,19 +99,7 @@ async def main():
 
             elif lesson_data["status"] == "found":
                 for attempt in lesson_data["new_attempts"]:
-                    lesson_title = attempt["lesson_title"]
-                    lesson_url = attempt["lesson_url"]
-                    if attempt["is_negative"]:
-                        text = (f"{name}, у вас проверили работу\n"
-                                f" '{lesson_title}'\n"
-                                f" {lesson_url}\n"
-                                f"К сожалению, в работе нашлись ошибки.")
-                    else:
-                        text = (f"{name}, у вас проверили работу\n"
-                                f" '{lesson_title}'\n"
-                                f" {lesson_url}\n"
-                                f"Преподавателю все понравилось!\n"
-                                f"Можно приступать к следующему уроку.")
+                    text = create_message(attempt, name)
                     await bot.send_message(chat_id=chat_id, text=text)
                 payload["timestamp"] = lesson_data["last_attempt_timestamp"]
 

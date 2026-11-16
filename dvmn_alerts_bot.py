@@ -90,7 +90,7 @@ async def main():
                                 f" '{lesson_title}'\n"
                                 f" {lesson_url}\n"
                                 f"Преподавателю все понравилось!\n"
-                                f"Можно приступать к следующему уроку. ")
+                                f"Можно приступать к следующему уроку.")
                     await bot.send_message(chat_id=chat_id, text=text)
                 payload["timestamp"] = lesson_data["last_attempt_timestamp"]
 

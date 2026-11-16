@@ -6,6 +6,7 @@ import time
 import requests
 from dotenv import load_dotenv
 from telegram import Bot
+from telegram.error import InvalidToken, TelegramError
 
 
 async def main():
@@ -35,22 +36,31 @@ async def main():
     )
     args = parser.parse_args()
 
+
     dvmn_token = os.environ["DVMN_TOKEN"]
     tg_token = os.environ["TG_TOKEN"]
 
-    if not dvmn_token or not tg_token:
-        print("Ошибка: Токены Девмана или Телеграма не найдены в .env файле.")
-        return
 
     url = "https://dvmn.org/api/long_polling/"
     headers = {"Authorization": f"Token {dvmn_token}"}
     payload = {}
-    bot = Bot(token=tg_token)
+    try:
+        bot = Bot(token=tg_token)
+    except InvalidToken:
+        print("Ошибка: Укажите токен Телеграм-бота (TG_TOKEN) в .env.")
+        return
 
     if args.chat_id:
         chat_id = args.chat_id
-        chat = await bot.get_chat(chat_id)
-        name = chat.first_name
+        try:
+            chat = await bot.get_chat(chat_id)
+            name = chat.first_name
+        except InvalidToken:
+            print("Ошибка: Токен Телеграм-бота недействителен.")
+            return
+        except TelegramError as err:
+            print(f"Ошибка Телеграма: {err}. Убедитесь, что chat_id правильный.")
+            return
     else:
         print("Укажите ваш телеграмм чат id .env файле или через флаг --chat_id")
         return
@@ -94,6 +104,11 @@ async def main():
             print("Потеряно соединение, отправляю запрос заново...")
             time.sleep(5)
             continue
+
+        except requests.exceptions.HTTPError as error:
+            if error.response.status_code == 401:
+                print("Ошибка: Неверный токен Девмана (DVMN_TOKEN). Проверьте настройки.")
+                return
 
 
 if __name__ == "__main__":

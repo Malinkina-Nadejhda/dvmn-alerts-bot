@@ -17,7 +17,7 @@ async def main():
         о проверенных работах.
         Пример ввода:
         python .\dvmn_alerts_bot.py # Запуск бота, если chat_id указан в .env
-        python .\dvmn_alerts_bot.py --chat_id 12345678910 # Запуск бота у указанием chat_id
+        python .\dvmn_alerts_bot.py --chat_id 12345678910 # Запуск бота c указанием chat_id
         """,
         epilog="""
         Для работы бота требуется файл .env

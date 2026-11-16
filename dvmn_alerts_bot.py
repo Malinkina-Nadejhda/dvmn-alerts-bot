@@ -52,7 +52,6 @@ def create_message(attempt, name):
                 f"Можно приступать к следующему уроку.")
 
 
-
 async def main():
     load_dotenv()
     args = parse_arguments()
@@ -104,7 +103,6 @@ async def main():
                 payload["timestamp"] = lesson_data["last_attempt_timestamp"]
 
         except requests.exceptions.ReadTimeout:
-            print("Сервер не ответил, отправляю запрос заново...")
             continue
 
         except requests.exceptions.ConnectionError:
